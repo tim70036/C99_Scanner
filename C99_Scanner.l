@@ -6,7 +6,7 @@
     #include <math.h>
 
     int numL = 0;
-    char buf[1000];     memset(buf,0,sizeof(buf));
+    char buf[1000];
     int bufIndex = 0;
 %}
 
@@ -15,9 +15,6 @@ CHAR     [A-Za-z]
 ID       [a-z][a-z0-9]*
 
 %%
-
-/* Rule Section*/
-
 \n  {
         numL++;
         printf("%d:%s\n",numL,buf);
@@ -25,7 +22,7 @@ ID       [a-z][a-z0-9]*
     }
 
 .   {
-        strcpy(buf[bufIndex], yytext);
+        strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
     }
 
