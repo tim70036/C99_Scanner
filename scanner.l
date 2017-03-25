@@ -9,33 +9,38 @@
     char buf[1000];
     int bufIndex = 0;
 
-    char bufStr[1000];
-    int bufStrIndex = 0;
 %}
 
 DIGIT    [0-9]
-CHAR     [A-Za-z(\\n)(\\t)]
-ID       [a-z][a-z0-9]*
-
-%x Str
+NUM     {DIGIT}*
+CHAR    \'.\'
+STR     \".*\"
 
 %%
-\"  {
-        BEGIN(Str);
+
+{CHAR}  {
+        
+        /* Error Detect? */
+
+        printf("#char:%c\n",yytext[1]);
+
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
     }
 
-<Str>\" {
-        /* String Ends */
-        BEGIN(INITIAL);
-        printf("#string:%s\n",bufStr);
-        bufStr[0] = 0;  /* Clean Buffer */
-        bufStrIndex = 0;
+{STR}   {
+        /* Extract String */
+        char str[1000];
+        strcpy(str,yytext+1); /* The first " is gone */
+        str[yyleng-2] = 0; /* The last " is gone */
+
+        /* Error Detect? */
+
+        printf("#string:%s\n",str);
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
-}
+    }
 
 \n  {
         numL++;
@@ -44,22 +49,11 @@ ID       [a-z][a-z0-9]*
         bufIndex = 0;
     }
 
-<Str>\n {
-        /* Error */
-    }
-
 .   {
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
     }
 
-<Str>. {
-        strcpy(&(bufStr[bufStrIndex]), yytext);
-        bufStrIndex += yyleng;
-
-        strcpy(&(buf[bufIndex]), yytext);
-        bufIndex += yyleng;
-    }
 
 %%
 
