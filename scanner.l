@@ -12,14 +12,76 @@
 %}
 
 DIGIT    [0-9]
-NUM     {DIGIT}*
+FS			(f|F|l|L)
+IS			(u|U|l|L)*
+E			[Ee][+-]?{DIGIT}+
+
+INT     {DIGIT}|[1-9]{DIGIT}*
+DOUBLE  ({DIGIT}*"."{DIGIT}+)|({DIGIT}+"."{DIGIT}*)
+SCI     ({INT}|{DOUBLE})({E})?
+
+PUNC    ":"|";"|","|"."|"["|"]"|"("|")"|"{"|"}"
 CHAR    \'.\'
-STR     \".*\"
+STR     \"(\\.|[^"])*\"
+OP      "+"|"-"|"*"|"/"|"%"|"++"|"--"|"<"|"<="|">"|">="|"=="|"!="|"="|"&&"|"||"|"!"
+/* Remain varaible * & */
+ID      [a-zA-Z_]*[a-zA-Z_0-9]*
+KEY     "void"|"int"|"double"|"bool"|"char"|"null"|"for"|"while"|"do"|"if"|"else"|"switch"|"return"|"break"|"continue"|"const"|"true"|"false"|"struct"|"case"|"default"
+STDIO    "remove"|"rename"|"tmpfile"|"tmpnam"|"fclose"|"fflush"|"fopen"|"freopen"|"setbuf"|"setvbuf"|"fprintf"|"fscanf"|"printf"|"scanf"|"sprintf"|"sscanf"|"vfprintf"|"vprintf"|"vsprintf"|"fgetc"|"fgets"|"fputc"|"fputs"|"getc"|"getchar"|"gets"|"putc"|"putchar"|"puts"|"ungetc"|"fread"|"fwrite"|"fgetpos"|"fseek"|"fsetpos"|"ftell"|"rewind"|"clearerr"|"feof"|"ferror"|"perror"
+SPACE   [ \f\t\r\v]+
 
 %%
+{KEY}   {
+        printf("#key:%s\n",yytext);
+
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+    }
+
+{STDIO} {
+        printf("#key:%s\n",yytext);
+
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+    }
+
+{INT}   {
+        printf("#integer:%s\n",yytext);
+
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+    }
+
+{DOUBLE} {
+        printf("#double:%s\n",yytext);
+
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+    }
+
+{SCI}   {
+        printf("#sci:%s\n",yytext);
+
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+    }
+
+{PUNC}  {
+        printf("#punc:%s\n",yytext);
+
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+    }
+
+{OP}    {
+        printf("#op:%s\n",yytext);
+
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+    }
 
 {CHAR}  {
-        
+
         /* Error Detect? */
 
         printf("#char:%c\n",yytext[1]);
@@ -38,6 +100,18 @@ STR     \".*\"
 
         printf("#string:%s\n",str);
 
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+    }
+
+{ID}    {
+        printf("#id:%s\n",yytext);
+
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+    }
+
+{SPACE}   {
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
     }
