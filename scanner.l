@@ -1,4 +1,4 @@
-/* Definition Section */
+    /* Definition Section */
 
 %{
     #include <stdio.h>
@@ -11,6 +11,8 @@
 
 %}
 
+%x  COMMENT
+
 DIGIT    [0-9]
 FS			(f|F|l|L)
 IS			(u|U|l|L)*
@@ -18,19 +20,51 @@ E			[Ee][+-]?{DIGIT}+
 
 INT     {DIGIT}|[1-9]{DIGIT}*
 DOUBLE  ({DIGIT}*"."{DIGIT}+)|({DIGIT}+"."{DIGIT}*)
-SCI     ({INT}|{DOUBLE})({E})?
+SCI     ({INT}|{DOUBLE})({E})
 
 PUNC    ":"|";"|","|"."|"["|"]"|"("|")"|"{"|"}"
 CHAR    \'.\'
 STR     \"(\\.|[^"])*\"
-OP      "+"|"-"|"*"|"/"|"%"|"++"|"--"|"<"|"<="|">"|">="|"=="|"!="|"="|"&&"|"||"|"!"
-/* Remain varaible * & */
+OP      "+"|"-"|"*"|"/"|"%"|"++"|"--"|"<"|"<="|">"|">="|"=="|"!="|"="|"&&"|"||"|"!"|"&"
 ID      [a-zA-Z_]*[a-zA-Z_0-9]*
 KEY     "void"|"int"|"double"|"bool"|"char"|"null"|"for"|"while"|"do"|"if"|"else"|"switch"|"return"|"break"|"continue"|"const"|"true"|"false"|"struct"|"case"|"default"
 STDIO    "remove"|"rename"|"tmpfile"|"tmpnam"|"fclose"|"fflush"|"fopen"|"freopen"|"setbuf"|"setvbuf"|"fprintf"|"fscanf"|"printf"|"scanf"|"sprintf"|"sscanf"|"vfprintf"|"vprintf"|"vsprintf"|"fgetc"|"fgets"|"fputc"|"fputs"|"getc"|"getchar"|"gets"|"putc"|"putchar"|"puts"|"ungetc"|"fread"|"fwrite"|"fgetpos"|"fseek"|"fsetpos"|"ftell"|"rewind"|"clearerr"|"feof"|"ferror"|"perror"
 SPACE   [ \f\t\r\v]+
-
 %%
+"/*"    {
+        BEGIN(COMMENT);
+
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+    }
+<COMMENT>"*/" {
+        /*  End of Comment  */
+        BEGIN(INITIAL);
+
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+}
+<COMMENT>\n {
+        /* Comment newline print it out */
+
+        numL++;
+        printf("%d:%s\n",numL,buf);
+        buf[0] = 0;  /* Clean Buffer */
+        bufIndex = 0;
+    }
+<COMMENT>.  {
+        /* If use .*  then it will eat the ending of comment */
+
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+    }
+
+"//".*  {
+        /* Single line comment , simply copy to buf, and wait for \n to handle*/
+        strcpy(&(buf[bufIndex]), yytext);
+        bufIndex += yyleng;
+    }
+
 {KEY}   {
         printf("#key:%s\n",yytext);
 
@@ -84,7 +118,7 @@ SPACE   [ \f\t\r\v]+
 
         /* Error Detect? */
 
-        printf("#char:%c\n",yytext[1]);
+        printf("#char:%s\n",yytext);
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
@@ -131,7 +165,7 @@ SPACE   [ \f\t\r\v]+
 
 %%
 
-/* C code Section */
+    /* C code Section */
 
 int main(int argc, char* argv[])
 {
