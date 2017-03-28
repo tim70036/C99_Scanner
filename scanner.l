@@ -5,10 +5,12 @@
     #include <string.h>
     #include <math.h>
 
-    int numL = 0;
+    int numL = 1;
     char buf[1000];
     int bufIndex = 0;
 
+    int tokenOn = 1;
+    int sourceOn = 1;
 %}
 
 %x  COMMENT
@@ -29,8 +31,21 @@ OP      "+"|"-"|"*"|"/"|"%"|"++"|"--"|"<"|"<="|">"|">="|"=="|"!="|"="|"&&"|"||"|
 ID      [a-zA-Z_]*[a-zA-Z_0-9]*
 KEY     "void"|"int"|"double"|"bool"|"char"|"null"|"for"|"while"|"do"|"if"|"else"|"switch"|"return"|"break"|"continue"|"const"|"true"|"false"|"struct"|"case"|"default"
 STDIO    "remove"|"rename"|"tmpfile"|"tmpnam"|"fclose"|"fflush"|"fopen"|"freopen"|"setbuf"|"setvbuf"|"fprintf"|"fscanf"|"printf"|"scanf"|"sprintf"|"sscanf"|"vfprintf"|"vprintf"|"vsprintf"|"fgetc"|"fgets"|"fputc"|"fputs"|"getc"|"getchar"|"gets"|"putc"|"putchar"|"puts"|"ungetc"|"fread"|"fwrite"|"fgetpos"|"fseek"|"fsetpos"|"ftell"|"rewind"|"clearerr"|"feof"|"ferror"|"perror"
+
 SPACE   [ \f\t\r\v]+
+
+SOURCE_ON   #{SPACE}?"pragma"{SPACE}"source"{SPACE}"on"
+SOURCE_OFF   #{SPACE}?"pragma"{SPACE}"source"{SPACE}"off"
+TOKEN_ON    #{SPACE}?"pragma"{SPACE}"token"{SPACE}"on"
+TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"
+
 %%
+
+{SOURCE_ON}     {   sourceOn = 1;  strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
+{SOURCE_OFF}    {   sourceOn = 0;  strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
+{TOKEN_ON}      {   tokenOn = 1;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
+{TOKEN_OFF}     {   tokenOn = 0;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
+
 "/*"    {
         BEGIN(COMMENT);
 
@@ -47,8 +62,11 @@ SPACE   [ \f\t\r\v]+
 <COMMENT>\n {
         /* Comment newline print it out */
 
-        numL++;
-        printf("%d:%s\n",numL,buf);
+        /* Check pragma */
+        if(sourceOn == 1)   printf("%d:%s\n",numL,buf);
+
+        numL++; /* Enter newline */
+
         buf[0] = 0;  /* Clean Buffer */
         bufIndex = 0;
     }
@@ -66,49 +84,56 @@ SPACE   [ \f\t\r\v]+
     }
 
 {KEY}   {
-        printf("#key:%s\n",yytext);
+        /* Check pragma */
+        if(tokenOn == 1)    printf("#key:%s\n",yytext);
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
     }
 
 {STDIO} {
-        printf("#key:%s\n",yytext);
+        /* Check pragma */
+        if(tokenOn == 1)    printf("#key:%s\n",yytext);
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
     }
 
 {INT}   {
-        printf("#integer:%s\n",yytext);
+        /* Check pragma */
+        if(tokenOn == 1)    printf("#integer:%s\n",yytext);
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
     }
 
 {DOUBLE} {
-        printf("#double:%s\n",yytext);
+        /* Check pragma */
+        if(tokenOn == 1)    printf("#double:%s\n",yytext);
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
     }
 
 {SCI}   {
-        printf("#sci:%s\n",yytext);
+        /* Check pragma */
+        if(tokenOn == 1)    printf("#sci:%s\n",yytext);
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
     }
 
 {PUNC}  {
-        printf("#punc:%s\n",yytext);
+        /* Check pragma */
+        if(tokenOn == 1)    printf("#punc:%s\n",yytext);
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
     }
 
 {OP}    {
-        printf("#op:%s\n",yytext);
+        /* Check pragma */
+        if(tokenOn == 1)    printf("#op:%s\n",yytext);
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
@@ -118,7 +143,8 @@ SPACE   [ \f\t\r\v]+
 
         /* Error Detect? */
 
-        printf("#char:%s\n",yytext);
+        /* Check pragma */
+        if(tokenOn == 1)    printf("#char:%s\n",yytext);
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
@@ -132,14 +158,16 @@ SPACE   [ \f\t\r\v]+
 
         /* Error Detect? */
 
-        printf("#string:%s\n",str);
+        /* Check pragma */
+        if(tokenOn == 1)    printf("#string:%s\n",str);
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
     }
 
 {ID}    {
-        printf("#id:%s\n",yytext);
+        /* Check pragma */
+        if(tokenOn == 1)    printf("#id:%s\n",yytext);
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
@@ -151,13 +179,20 @@ SPACE   [ \f\t\r\v]+
     }
 
 \n  {
-        numL++;
-        printf("%d:%s\n",numL,buf);
+
+        /* Check pragma */
+        if(sourceOn == 1)   printf("%d:%s\n",numL,buf);
+
+        numL++; /* Enter newline */
+
         buf[0] = 0;  /* Clean Buffer */
         bufIndex = 0;
+
     }
 
 .   {
+        fprintf(stderr, "Error at line %d: %s\n", numL, yytext); exit(1);
+
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
     }
