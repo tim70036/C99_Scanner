@@ -16,18 +16,24 @@
 %x  COMMENT
 
 DIGIT    [0-9]
+DIGIT_SEQ  {DIGIT}+
+FRAC    ({DIGIT_SEQ}?"."{DIGIT_SEQ})|({DIGIT_SEQ}".")
+E		[Ee][+-]?{DIGIT_SEQ}
+FS		(f|F|l|L)
+
+DOUBLE  {FRAC}{FS}?
+SCI     ({FRAC}|{DIGIT_SEQ}){E}{FS}?
+
 L       (l|L|ll|LL)
 U       (u|U)
-FS		(f|F|l|L)
 IS      ({U}|{L}|{L}{U}|{U}{L})
-E		[Ee][+-]?{DIGIT}+
 
 INT     ({DIGIT}|[1-9]{DIGIT}*){IS}?
-DOUBLE  ({DIGIT}*"."{DIGIT}+)|({DIGIT}+"."{DIGIT}*)
-SCI     ({INT}|{DOUBLE})({E})
+
+
 
 PUNC    ":"|";"|","|"."|"["|"]"|"("|")"|"{"|"}"
-CHAR    \'.\'
+CHAR    (\'[^'\\]\')|(\'("\n"|"\t")\')
 STR     \"(\\.|[^"])*\"
 OP      "+"|"-"|"*"|"/"|"%"|"++"|"--"|"<"|"<="|">"|">="|"=="|"!="|"="|"&&"|"||"|"!"|"&"
 ID      [a-zA-Z_]*[a-zA-Z_0-9]*
