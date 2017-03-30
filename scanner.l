@@ -16,11 +16,13 @@
 %x  COMMENT
 
 DIGIT    [0-9]
-FS			(f|F|l|L)
-IS			(u|U|l|L)*
-E			[Ee][+-]?{DIGIT}+
+L       (l|L|ll|LL)
+U       (u|U)
+FS		(f|F|l|L)
+IS      ({U}|{L}|{L}{U}|{U}{L})
+E		[Ee][+-]?{DIGIT}+
 
-INT     {DIGIT}|[1-9]{DIGIT}*
+INT     ({DIGIT}|[1-9]{DIGIT}*){IS}?
 DOUBLE  ({DIGIT}*"."{DIGIT}+)|({DIGIT}+"."{DIGIT}*)
 SCI     ({INT}|{DOUBLE})({E})
 
