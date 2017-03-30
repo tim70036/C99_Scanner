@@ -31,10 +31,10 @@ IS      ({U}|{L}|{L}{U}|{U}{L})
 INT     ({DIGIT}|[1-9]{DIGIT}*){IS}?
 
 
+CHAR    '([^'\\\n]|\\(n|t))'
+STR     \"(\\(n|t)|[^"\\\n])*\"
 
 PUNC    ":"|";"|","|"."|"["|"]"|"("|")"|"{"|"}"
-CHAR    (\'[^'\\]\')|(\'("\n"|"\t")\')
-STR     \"(\\.|[^"])*\"
 OP      "+"|"-"|"*"|"/"|"%"|"++"|"--"|"<"|"<="|">"|">="|"=="|"!="|"="|"&&"|"||"|"!"|"&"
 ID      [a-zA-Z_]*[a-zA-Z_0-9]*
 KEY     "void"|"int"|"double"|"bool"|"char"|"null"|"for"|"while"|"do"|"if"|"else"|"switch"|"return"|"break"|"continue"|"const"|"true"|"false"|"struct"|"case"|"default"
