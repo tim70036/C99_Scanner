@@ -18,10 +18,11 @@
 DIGIT    [0-9]
 DIGIT_SEQ  {DIGIT}+
 FRAC    ({DIGIT_SEQ}?"."{DIGIT_SEQ})|({DIGIT_SEQ}".")
-E		[Ee][+-]?{DIGIT_SEQ}
 FS		(f|F|l|L)
 
 DOUBLE  {FRAC}{FS}?
+
+E		[Ee][+-]?{DIGIT_SEQ}
 SCI     ({FRAC}|{DIGIT_SEQ}){E}{FS}?
 
 L       (l|L|ll|LL)
@@ -51,9 +52,7 @@ TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"
 
 {SOURCE_ON}     {   sourceOn = 1;  strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
 {SOURCE_OFF}    {   sourceOn = 0;  strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
-{TOKEN_ON}      {   tokenOn = 1;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
-{TOKEN_OFF}     {   tokenOn = 0;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
-
+{TOKEN_ON}      {   tokenOn = 1;   strcpy(&(buf[bufIndex]), yytext);  bufIndex ｀
 "/*"    {
         BEGIN(COMMENT);
 
