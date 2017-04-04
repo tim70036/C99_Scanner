@@ -1,0 +1,54 @@
+/* String and Char */
+L"ABCD"
+L'A'
+
+/* Floating */
+1234.
+01234.
+01234.01234
+.1234
+
+/* Floating suffix */
+1234.L
+1234.l
+1234.F
+1234.f
+
+/* Scientific */
+12E0123
+12e0123
+01234E01
+01234e01
+
+/* Scientific suffix */
+12E0123l
+12e0123L
+01234E01f
+01234e01F
+
+/* Integer suffix */
+1234u
+1234l
+1234ll
+1234LL
+1234L
+1234U
+
+1234uLL
+1234uL
+1234ul
+1234ull
+1234ULL
+1234UL
+1234Ul
+1234Ull
+
+1234lu
+1234llu
+1234Lu
+1234LLu
+
+1234lU
+1234llU
+1234LU
+1234LLU

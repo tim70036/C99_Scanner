@@ -32,8 +32,8 @@ IS      ({U}|{L}|{L}{U}|{U}{L})
 INT     ({DIGIT}|[1-9]{DIGIT}*){IS}?
 
 
-CHAR    '([^'\\\n]|\\(n|t))'
-STR     \"(\\(n|t)|[^"\\\n])*\"
+CHAR    L?'([^'\\\n]|\\(n|t))'
+STR     L?\"(\\(n|t)|[^"\\\n])*\"
 
 ID      [a-zA-Z_]+[a-zA-Z_0-9]*
 
@@ -50,9 +50,11 @@ TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"
 
 %%
 
-{SOURCE_ON}     {   sourceOn = 1;  strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
-{SOURCE_OFF}    {   sourceOn = 0;  strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
-{TOKEN_ON}      {   tokenOn = 1;   strcpy(&(buf[bufIndex]), yytext);  bufIndex ｀
+{SOURCE_ON}    {   sourceOn = 1;  strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
+{SOURCE_OFF}   {   sourceOn = 0;  strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
+{TOKEN_ON}      {   tokenOn = 1;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
+{TOKEN_OFF}    {   tokenOn = 0;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
+
 "/*"    {
         BEGIN(COMMENT);
 
@@ -98,7 +100,7 @@ TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"
         bufIndex += yyleng;
     }
 
-{STDIO} {
+{STDIO}  {
         /* Check pragma */
         if(tokenOn == 1)    printf("#key:%s\n",yytext);
 
@@ -106,7 +108,7 @@ TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"
         bufIndex += yyleng;
     }
 
-{INT}   {
+{INT}    {
         /* Check pragma */
         if(tokenOn == 1)    printf("#integer:%s\n",yytext);
 
@@ -114,7 +116,7 @@ TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"
         bufIndex += yyleng;
     }
 
-{DOUBLE} {
+{DOUBLE}  {
         /* Check pragma */
         if(tokenOn == 1)    printf("#double:%s\n",yytext);
 
@@ -122,7 +124,7 @@ TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"
         bufIndex += yyleng;
     }
 
-{SCI}   {
+{SCI}    {
         /* Check pragma */
         if(tokenOn == 1)    printf("#sci:%s\n",yytext);
 
@@ -130,7 +132,7 @@ TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"
         bufIndex += yyleng;
     }
 
-{PUNC}  {
+{PUNC}   {
         /* Check pragma */
         if(tokenOn == 1)    printf("#punc:%s\n",yytext);
 
@@ -157,11 +159,21 @@ TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"
         bufIndex += yyleng;
     }
 
+
 {STR}   {
         /* Extract String */
         char str[1000];
-        strcpy(str,yytext+1); /* The first " is gone */
-        str[yyleng-2] = 0; /* The last " is gone */
+        if(yytext[0] == 'L')
+        {
+            strcpy(str,yytext+2); /* The first " is gone */
+            str[yyleng-3] = 0; /* The last " is gone */
+        }
+        else
+        {
+            strcpy(str,yytext+1);
+            str[yyleng-2] = 0; /* The last " is gone */
+        }
+
 
         /* Error Detect? */
 
