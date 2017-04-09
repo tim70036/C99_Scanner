@@ -43,17 +43,44 @@ KEY     "void"|"int"|"double"|"bool"|"char"|"null"|"for"|"while"|"do"|"if"|"else
 STDIO    "remove"|"rename"|"tmpfile"|"tmpnam"|"fclose"|"fflush"|"fopen"|"freopen"|"setbuf"|"setvbuf"|"fprintf"|"fscanf"|"printf"|"scanf"|"sprintf"|"sscanf"|"vfprintf"|"vprintf"|"vsprintf"|"fgetc"|"fgets"|"fputc"|"fputs"|"getc"|"getchar"|"gets"|"putc"|"putchar"|"puts"|"ungetc"|"fread"|"fwrite"|"fgetpos"|"fseek"|"fsetpos"|"ftell"|"rewind"|"clearerr"|"feof"|"ferror"|"perror"
 SPACE   [ \f\t\r\v]+
 
-SOURCE_ON   #{SPACE}?"pragma"{SPACE}"source"{SPACE}"on"
-SOURCE_OFF   #{SPACE}?"pragma"{SPACE}"source"{SPACE}"off"
-TOKEN_ON    #{SPACE}?"pragma"{SPACE}"token"{SPACE}"on"
-TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"
+SOURCE_ON   #{SPACE}?"pragma"{SPACE}"source"{SPACE}"on"{SPACE}?\n
+SOURCE_OFF   #{SPACE}?"pragma"{SPACE}"source"{SPACE}"off"{SPACE}?\n
+TOKEN_ON    #{SPACE}?"pragma"{SPACE}"token"{SPACE}"on"{SPACE}?\n
+TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"{SPACE}?\n
 
 %%
 
-{SOURCE_ON}    {   sourceOn = 1;  strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
-{SOURCE_OFF}   {   sourceOn = 0;  strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
-{TOKEN_ON}      {   tokenOn = 1;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
-{TOKEN_OFF}    {   tokenOn = 0;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += yyleng;}
+{SOURCE_ON}    {
+    sourceOn = 1;
+
+    /* Fuck \n */
+    yytext[yyleng-1] = 0;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += (yyleng-1);
+    unput('\n');
+    }
+
+{SOURCE_OFF}   {
+    sourceOn = 0;
+
+    /* Fuck \n */
+    yytext[yyleng-1] = 0;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += (yyleng-1);
+    unput('\n');
+    }
+
+{TOKEN_ON}      {
+    tokenOn = 1;
+
+    /* Fuck \n */
+    yytext[yyleng-1] = 0;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += (yyleng-1);
+    unput('\n');
+    }
+
+{TOKEN_OFF}    {
+    tokenOn = 0;
+    
+    /* Fuck \n */
+    yytext[yyleng-1] = 0;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += (yyleng-1);
+    unput('\n');
+    }
 
 "/*"    {
         BEGIN(COMMENT);
@@ -106,6 +133,11 @@ TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
+    }
+
+0{INT}  {
+    /* In order to make TA happy */
+    fprintf(stderr, "Error at line %d: %s\n", numL, yytext); exit(1);
     }
 
 {INT}    {
