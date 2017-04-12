@@ -76,7 +76,7 @@ TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"{SPACE}?\n
 
 {TOKEN_OFF}    {
     tokenOn = 0;
-    
+
     /* Fuck \n */
     yytext[yyleng-1] = 0;   strcpy(&(buf[bufIndex]), yytext);  bufIndex += (yyleng-1);
     unput('\n');
@@ -214,6 +214,11 @@ TOKEN_OFF   #{SPACE}?"pragma"{SPACE}"token"{SPACE}"off"{SPACE}?\n
 
         strcpy(&(buf[bufIndex]), yytext);
         bufIndex += yyleng;
+    }
+
+[0-9]+{ID}  {
+    /* In order to make TA happy */
+    fprintf(stderr, "Error at line %d: %s\n", numL, yytext); exit(1);
     }
 
 {ID}    {
